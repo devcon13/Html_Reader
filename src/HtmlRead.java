@@ -13,8 +13,12 @@ public class HtmlRead {
     public JLabel urlText;
     public JLabel termText;
     public JLabel statusLabel;
-    public JLabel results;
+    public JTextArea results;
     public JButton searchButton;
+
+    public String currentLink;
+    public String linkList;
+    public String searchTerm;
 
 
     public static void main(String[] args) {
@@ -23,10 +27,12 @@ public class HtmlRead {
 
     public HtmlRead() {
         prepareGUI();
+        searchLink();
+    }
 
-        /*
+    public void searchLink(){
+        linkList = "Results:\n";
         try {
-            String word = "schema";
             System.out.println();
             System.out.print("hello \n");
             URL url = new URL("https://www.milton.edu/");
@@ -35,20 +41,28 @@ public class HtmlRead {
             );
             String line;
             while ( (line = reader.readLine()) != null ) {
-                if(line.contains("href")) {
-                    //if(line.indexOf(word) != -1) {
-                        System.out.println(line);
-                    //}
+                if(line.contains("href=\"http")) {
+                    //System.out.println("og: "+line);
+                    if(searchTerm==null){
+                        results.setText("please enter a search term");
+                    } else {
+                        if (line.contains(searchTerm)) {
+                            currentLink = (line.substring((line.indexOf("href=") + 6), (line.indexOf("\"", line.indexOf("href=") + 6))));
+                            linkList = linkList.concat(currentLink + "\n");
+                        }
+                    }
                 }
-
             }
             reader.close();
+            if(searchTerm==null){
+                results.setText("please enter a search term");
+            } else {
+                results.setText(linkList);
+            }
         } catch(Exception ex) {
             System.out.println(ex);
         }
-
-         */
-
+        System.out.println(linkList);
     }
 
     public void prepareGUI(){
@@ -58,7 +72,7 @@ public class HtmlRead {
         urlText = new JLabel("URL:", JLabel.CENTER);
         termText = new JLabel("Term:", JLabel.CENTER);
         statusLabel = new JLabel("", JLabel.CENTER);
-        results = new JLabel("");
+        results = new JTextArea();
 
         urlSearch = new JTextArea();
         urlSearch.setBounds(50,5,700,650);
@@ -92,6 +106,9 @@ public class HtmlRead {
                 else {
                     statusLabel.setText("Invalid URL");
                 }
+
+                searchTerm = termSearch.getText();
+                searchLink();
             }
         }
     }
