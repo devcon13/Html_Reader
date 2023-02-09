@@ -6,20 +6,20 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class HtmlRead {
-
     public JFrame mainFrame;
+    public JPanel panel;
+    public JPanel bigPanel;
     public JTextArea urlSearch;
     public JTextArea termSearch;
     public JLabel urlText;
     public JLabel termText;
-    public JLabel statusLabel;
     public JTextArea results;
     public JButton searchButton;
+    public JScrollPane scrollBar;
 
     public String currentLink;
     public String linkList;
     public String searchTerm;
-
 
     public static void main(String[] args) {
         HtmlRead html = new HtmlRead();
@@ -27,52 +27,48 @@ public class HtmlRead {
 
     public HtmlRead() {
         prepareGUI();
-        searchLink();
     }
 
     public void searchLink(){
         linkList = "Results:\n";
         try {
-            System.out.println();
-            System.out.print("hello \n");
-            URL url = new URL("https://www.milton.edu/");
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(url.openStream())
-            );
+            URL url = new URL(urlSearch.getText());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
             String line;
+
             while ( (line = reader.readLine()) != null ) {
                 if(line.contains("href=\"http")) {
-                    //System.out.println("og: "+line);
-                    if(searchTerm==null){
-                        results.setText("please enter a search term");
-                    } else {
-                        if (line.contains(searchTerm)) {
-                            currentLink = (line.substring((line.indexOf("href=") + 6), (line.indexOf("\"", line.indexOf("href=") + 6))));
+                    currentLink = (line.substring((line.indexOf("href=\"http") + 6), (line.indexOf("\"", line.indexOf("href=\"http") + 6))));
+                    if(currentLink.contains(searchTerm)) {
+                        if(linkList.contains(currentLink)){} else { // no repeats of links
                             linkList = linkList.concat(currentLink + "\n");
                         }
                     }
                 }
             }
             reader.close();
-            if(searchTerm==null){
-                results.setText("please enter a search term");
+
+            if(linkList == "Results:\n"){
+                results.setText("no results found");
             } else {
                 results.setText(linkList);
             }
         } catch(Exception ex) {
-            System.out.println(ex);
+            results.setText("please enter a valid link");
         }
-        System.out.println(linkList);
     }
 
     public void prepareGUI(){
         mainFrame = new JFrame("Html Project");
-        mainFrame.setLayout(new GridLayout(10,1));
+        mainFrame.setLayout(new GridLayout(2,1));
+
+        bigPanel = new JPanel();
+        bigPanel.setLayout(new BorderLayout());
+        panel = new JPanel();
+        panel.setLayout(new GridLayout(2,2));
 
         urlText = new JLabel("URL:", JLabel.CENTER);
         termText = new JLabel("Term:", JLabel.CENTER);
-        statusLabel = new JLabel("", JLabel.CENTER);
-        results = new JTextArea();
 
         urlSearch = new JTextArea();
         urlSearch.setBounds(50,5,700,650);
@@ -83,14 +79,19 @@ public class HtmlRead {
         searchButton.setActionCommand("Search");
         searchButton.addActionListener(new ButtonClickListener());
 
+        results = new JTextArea();
+        results.setLineWrap(true);
+        scrollBar = new JScrollPane(results);
+        scrollBar.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-        mainFrame.add(urlText);
-        mainFrame.add(urlSearch);
-        mainFrame.add(termText);
-        mainFrame.add(termSearch);
-        mainFrame.add(searchButton);
-        mainFrame.add(statusLabel);
-        mainFrame.add(results);
+        panel.add(urlText);
+        panel.add(urlSearch);
+        panel.add(termText);
+        panel.add(termSearch);
+        bigPanel.add(panel, BorderLayout.CENTER);
+        bigPanel.add(searchButton, BorderLayout.SOUTH);
+        mainFrame.add(bigPanel);
+        mainFrame.add(scrollBar);
         mainFrame.setSize(800,700);
         mainFrame.setVisible(true);
     }
@@ -100,17 +101,13 @@ public class HtmlRead {
             String command = e.getActionCommand();
             if (command.equals("Search")) {
                 System.out.println(urlSearch.getText());
-                if(urlSearch.getText().contains(".com")){
-                    statusLabel.setText("URL Found");
-                }
-                else {
-                    statusLabel.setText("Invalid URL");
-                }
-
                 searchTerm = termSearch.getText();
-                searchLink();
+                if(searchTerm.equals("")) {
+                    results.setText("please enter a search term");
+                } else {
+                    searchLink();
+                }
             }
         }
     }
-
 }
