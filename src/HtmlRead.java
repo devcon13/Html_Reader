@@ -22,7 +22,7 @@ public class HtmlRead {
     public String searchTerm;
 
     public static void main(String[] args) {
-        HtmlRead html = new HtmlRead();
+        new HtmlRead();
     }
 
     public HtmlRead() {
@@ -40,7 +40,7 @@ public class HtmlRead {
                 if(line.contains("href=\"http")) {
                     currentLink = (line.substring((line.indexOf("href=\"http") + 6), (line.indexOf("\"", line.indexOf("href=\"http") + 6))));
                     if(currentLink.contains(searchTerm)) {
-                        if(linkList.contains(currentLink)){} else { // no repeats of links
+                        if(!linkList.contains(currentLink)){
                             linkList = linkList.concat(currentLink + "\n");
                         }
                     }
@@ -48,7 +48,7 @@ public class HtmlRead {
             }
             reader.close();
 
-            if(linkList == "Results:\n"){
+            if(linkList.equals("Results:\n")){
                 results.setText("no results found");
             } else {
                 results.setText(linkList);
